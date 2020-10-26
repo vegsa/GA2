@@ -497,7 +497,7 @@ class ESKF:
         """
         H = np.hstack([np.eye(3), np.zeros((3,12))]) # TODO: measurement matrix
         """
-        I = np.identity(3)
+        I = np.eye(3)
         
         
         #q = x_nominal[ATT_IDX]
@@ -508,7 +508,7 @@ class ESKF:
         #Q_deltaTheta = 1/2 * np.concatenate(([Q_top], Q_bottom), axis = 0)
         #X_deltax = la.block_diag(np.eye(6), Q_deltaTheta, np.eye(6))
         
-        H = np.block([np.eye(3), np.zeros((3,12))])
+        H = np.block([I, np.zeros((3,12))])
         
         v = z_GNSS_position - x_nominal[POS_IDX]  # TODO: innovation
 
