@@ -499,17 +499,17 @@ class ESKF:
         """
         I = np.identity(3)
         
-        H = (np.concatenate((I, np.zeros((3,13))), axis=1))
-        """
-        q = x_nominal[ATT_IDX]
-        eta = q[0]
-        epsilon = q[1:]
-        Q_bottom = eta * np.eye(3) + cross_product_matrix(epsilon)
-        Q_top = -epsilon.T
-        Q_deltaTheta = 1/2 * np.concatenate(([Q_top], Q_bottom), axis = 0)
-        X_deltax = la.block_diag(np.eye(6), Q_deltaTheta, np.eye(6))
-        H = H_x @ X_deltax
-        """
+        
+        #q = x_nominal[ATT_IDX]
+        #eta = q[0]
+        #epsilon = q[1:]
+        #Q_bottom = eta * np.eye(3) + cross_product_matrix(epsilon)
+        #Q_top = -epsilon.T
+        #Q_deltaTheta = 1/2 * np.concatenate(([Q_top], Q_bottom), axis = 0)
+        #X_deltax = la.block_diag(np.eye(6), Q_deltaTheta, np.eye(6))
+        
+        H = np.block([np.eye(3), np.zeros((3,12))])
+        
         v = z_GNSS_position - x_nominal[POS_IDX]  # TODO: innovation
 
         # leverarm compensation
@@ -571,7 +571,8 @@ class ESKF:
             x_nominal, P, z_GNSS_position, R_GNSS, lever_arm
         )
         
-        H = np.concatenate((np.identity(3), np.zeros((3,13))), axis=1)
+        
+        H = np.block([np.eye(3), np.zeros((3,12))])
         
         # in case of a specified lever arm
         if not np.allclose(lever_arm, 0):
