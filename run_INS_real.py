@@ -6,6 +6,7 @@ import scipy.stats
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from math import floor
 
 try: # see if tqdm is available, otherwise define it as a dummy
     try: # Ipython seem to require different tqdm.. try..except seem to be the easiest way to check
@@ -114,7 +115,7 @@ gnss_steps = len(z_GNSS)
 
 # %% Measurement noise
 # Continous noise
-cont_gyro_noise_std = 6e-4 # TODO
+cont_gyro_noise_std = 4.36e-5 # TODO
 cont_acc_noise_std = 1.167e-3 # TODO
 
 # Discrete sample noise at simulation rate used
@@ -165,7 +166,7 @@ x_pred[0, ATT_IDX] = np.array([
     np.sin(45 * np.pi / 180)
 ])  # nose to east, right to south and belly down.
 
-P_pred[0][POS_IDX**2] = 10**2 * np.eye(3)
+P_pred[0][POS_IDX**2] = 5**2 * np.eye(3)
 P_pred[0][VEL_IDX**2] = 3**2 * np.eye(3)
 P_pred[0][ERR_ATT_IDX**2] = (np.pi/30)**2 * np.eye(3) # error rotation vector (not quat)
 P_pred[0][ERR_ACC_BIAS_IDX**2] = 0.05**2 * np.eye(3)
@@ -173,7 +174,17 @@ P_pred[0][ERR_GYRO_BIAS_IDX**2] = (1e-3)**2 * np.eye(3)
 
 # %% Run estimation
 
-N = 3000
+N = 10000
+start = 50000
+startGNSS = int(start*dt)
+
+timeGNSS = timeGNSS[startGNSS:]
+timeIMU = timeIMU[start:]
+z_acceleration = z_acceleration[start:]
+z_GNSS = z_GNSS[startGNSS:]
+z_gyroscope = z_gyroscope[start:]
+accuracy_GNSS = accuracy_GNSS[startGNSS:]
+
 GNSSk = 0
 
 for k in tqdm(range(N)):
@@ -190,7 +201,6 @@ for k in tqdm(range(N)):
         # no updates, so estimate = prediction
         x_est[k] = x_pred[k] # TODO
         P_est[k] = P_pred[k] # TODO
-
     if k < N - 1:
         x_pred[k + 1], P_pred[k + 1] = eskf.predict(x_est[k], P_est[k], z_acceleration[k+1], z_gyroscope[k+1], dt) # TODO
 
